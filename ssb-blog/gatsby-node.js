@@ -8,26 +8,30 @@ exports.createPages = async ({ graphql, actions, reporter }) => {
   const { createPage } = actions
 
   // Define a template for blog post
-  const blogPost = path.resolve(`./src/templates/blog-post.js`)
+  const blogPost = path.resolve(`./src/templates/blog-post.js`);
+  const podcastPost = path.resolve(`./src/templates/podcast-post.js`);
+  
+  const result = await parse('https://anchor.fm/s/7ebe7f20/podcast/rss');
+  const resultData = await result.items;
 
   // Get all markdown blog posts sorted by date
-  const result = await graphql(
-    `
-      {
-        allMarkdownRemark(
-          sort: { fields: [frontmatter___date], order: ASC }
-          limit: 1000
-        ) {
-          nodes {
-            id
-            fields {
-              slug
-            }
-          }
-        }
-      }
-    `
-  )
+  // const result = await graphql(
+  //   `
+  //     {
+  //       allMarkdownRemark(
+  //         sort: { fields: [frontmatter___date], order: ASC }
+  //         limit: 1000
+  //       ) {
+  //         nodes {
+  //           id
+  //           fields {
+  //             slug
+  //           }
+  //         }
+  //       }
+  //     }
+  //   `
+  // )
 
   if (result.errors) {
     reporter.panicOnBuild(
@@ -37,28 +41,47 @@ exports.createPages = async ({ graphql, actions, reporter }) => {
     return
   }
 
-  const posts = result.data.allMarkdownRemark.nodes
+  // const posts = result.data.allMarkdownRemark.nodes
 
   // Create blog posts pages
   // But only if there's at least one markdown file found at "content/blog" (defined in gatsby-config.js)
   // `context` is available in the template as a prop and as a variable in GraphQL
 
-  if (posts.length > 0) {
-    posts.forEach((post, index) => {
-      const previousPostId = index === 0 ? null : posts[index - 1].id
-      const nextPostId = index === posts.length - 1 ? null : posts[index + 1].id
+  // if (posts.length > 0) {
+  //   posts.forEach((post, index) => {
+  //     const previousPostId = index === 0 ? null : posts[index - 1].id
+  //     const nextPostId = index === posts.length - 1 ? null : posts[index + 1].id
 
+  //     createPage({
+  //       path: post.fields.slug,
+  //       component: blogPost,
+  //       context: {
+  //         id: post.id,
+  //         previousPostId,
+  //         nextPostId,
+  //       },
+  //     })
+  //   })
+  // }
+  if (resultData.length > 0) {
+    resultData.forEach((post, index) => {
+      const previousPostId = index === 0 ? null : resultData[index - 1].id
+      const nextPostId = index === resultData.length - 1 ? null : resultData[index + 1].id
+      const slug = `podcast/${post.itunes_episode}`;
+      console.log('{{{resultData}}}', resultData);
       createPage({
-        path: post.fields.slug,
-        component: blogPost,
+        path: slug,
+        component: podcastPost,
         context: {
-          id: post.id,
+          id: post.itunes_episode.toString(),
           previousPostId,
           nextPostId,
         },
       })
     })
   }
+
+  resultData
 }
 
 exports.onCreateNode = ({ node, actions, getNode }) => {
@@ -109,6 +132,7 @@ exports.createSchemaCustomization = ({ actions }) => {
       title: String
       description: String
       date: Date @dateformat
+      podcastID: Int
     }
 
     type Fields {

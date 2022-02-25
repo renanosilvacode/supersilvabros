@@ -132,5 +132,17 @@ module.exports = {
     // this (optional) plugin enables Progressive Web App + Offline functionality
     // To learn more, visit: https://gatsby.dev/offline
     // `gatsby-plugin-offline`,
+    {
+      resolve: "gatsby-plugin-parse-rss",
+      options: {
+        rss: [
+          {
+            urlToFetch: "https://anchor.fm/s/7ebe7f20/podcast/rss",
+            selectors: ["title", "description", "item:title", 'item:description'],
+            name: "blogPostRSS",
+          },
+        ],
+      },
+    },
   ],
 }

@@ -9,7 +9,7 @@ const { parse } = require('rss-to-json');
 
 const BlogIndex = ({ data, location }) => {
   const siteTitle = data.site.siteMetadata?.title || `Title`
-  const posts = data.allMarkdownRemark.nodes
+  // const posts = data.allMarkdownRemark.nodes
   const rssItems = data.podcastRss.items;
   
   const [feed, setFeed] = useState([])
@@ -19,9 +19,9 @@ const BlogIndex = ({ data, location }) => {
     });
   }, [])
 
-  console.log(feed)
+  console.log('{{{{DATA}}}}', data);
 
-  if (posts.length === 0) {
+  if (rssItems.length === 0) {
     return (
       <Layout location={location} title={siteTitle}>
         <Seo title="All posts" />
@@ -41,23 +41,12 @@ const BlogIndex = ({ data, location }) => {
       <Bio />
 
       <ol style={{ listStyle: `none` }}>
-        {/* Isso vem do client */}
-        <p>
-          {feed.length && (feed[0].title)}
-        </p>
-          
-
-        {/* Isso vem do server */}
-        <p>
-          {rssItems[0].title};
-        </p>
-        
-        {posts.map((post, index) => {
-          const title = post.frontmatter.title || post.fields.slug
-          
+        {rssItems.map((post, index) => {
+          const title = post.title
+          const slug = `podcast/${post.itunes_episode}`
           
           return (
-            <li key={post.fields.slug}>
+            <li key={slug}>
               <article
                 className="post-list-item"
                 itemScope
@@ -65,20 +54,21 @@ const BlogIndex = ({ data, location }) => {
               >
                 <header>
                   <h2>
-                    <Link to={post.fields.slug} itemProp="url">
+                    <Link to={slug} itemProp="url">
                       <span itemProp="headline">{title}</span>
                     </Link>
                   </h2>
-                  <small>{post.frontmatter.date}</small>
+                  <small>{post.created}</small>
                 </header>
                 <section>
                   <p
                     dangerouslySetInnerHTML={{
-                      __html: post.frontmatter.description || post.excerpt,
+                      __html: post.description || post.excerpt,
                     }}
                     itemProp="description"
                   />
                 </section>
+                
               </article>
             </li>
           )
@@ -100,7 +90,15 @@ export const pageQuery = graphql`
         description
         link
         author
+        created
+        itunes_episode
+        link
         published
+        enclosures {
+          url
+          length
+          type
+        }
       }
     }
     site {
@@ -118,6 +116,7 @@ export const pageQuery = graphql`
           date(formatString: "MMMM DD, YYYY")
           title
           description
+          podcastID
         }
       }
     }
