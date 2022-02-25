@@ -16,6 +16,7 @@
     "gatsby-plugin-image": "^2.7.0",
     "gatsby-plugin-manifest": "^4.7.0",
     "gatsby-plugin-offline": "^5.7.0",
+    "gatsby-plugin-parse-rss": "^1.0.3",
     "gatsby-plugin-react-helmet": "^5.7.0",
     "gatsby-plugin-sharp": "^4.7.0",
     "gatsby-remark-copy-linked-files": "^5.7.0",
