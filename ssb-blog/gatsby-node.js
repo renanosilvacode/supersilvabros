@@ -1,4 +1,7 @@
-const path = require(`path`)
+const path = require(`path`);
+const fetch = require(`node-fetch`);
+const { parse } = require('rss-to-json');
+
 const { createFilePath } = require(`gatsby-source-filesystem`)
 
 exports.createPages = async ({ graphql, actions, reporter }) => {
@@ -112,4 +115,27 @@ exports.createSchemaCustomization = ({ actions }) => {
       slug: String
     }
   `)
+}
+
+exports.sourceNodes = async ({
+  actions: { createNode },
+  createContentDigest,
+}) => {
+  // get data from GitHub API at build time
+  const result = await parse('https://anchor.fm/s/7ebe7f20/podcast/rss');
+  const resultData = await result.items;
+  // create node for build time data example in the docs
+  createNode({
+    title: result.title,
+    description: result.description,
+    items: resultData,
+    // required fields
+    id: `podcast-rss`,
+    parent: null,
+    children: [],
+    internal: {
+      type: `PodcastRss`,
+      contentDigest: createContentDigest(resultData),
+    },
+  })
 }
