@@ -1,13 +1,24 @@
-import * as React from "react"
+import React, { useState, useEffect } from "react"
 import { Link, graphql } from "gatsby"
 
 import Bio from "../components/bio"
 import Layout from "../components/layout"
 import Seo from "../components/seo"
+const { parse } = require('rss-to-json');
+
 
 const BlogIndex = ({ data, location }) => {
   const siteTitle = data.site.siteMetadata?.title || `Title`
   const posts = data.allMarkdownRemark.nodes
+  
+  const [feed, setFeed] = useState(0)
+  useEffect(() => {
+    parse('https://anchor.fm/s/7ebe7f20/podcast/rss').then(rss => {
+      setFeed(rss.items)
+    });
+  }, [])
+
+  console.log(feed)
 
   if (posts.length === 0) {
     return (
