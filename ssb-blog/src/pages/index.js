@@ -10,8 +10,9 @@ const { parse } = require('rss-to-json');
 const BlogIndex = ({ data, location }) => {
   const siteTitle = data.site.siteMetadata?.title || `Title`
   const posts = data.allMarkdownRemark.nodes
+  const rssItems = data.podcastRss.items;
   
-  const [feed, setFeed] = useState(0)
+  const [feed, setFeed] = useState([])
   useEffect(() => {
     parse('https://anchor.fm/s/7ebe7f20/podcast/rss').then(rss => {
       setFeed(rss.items)
@@ -38,10 +39,23 @@ const BlogIndex = ({ data, location }) => {
     <Layout location={location} title={siteTitle}>
       <Seo title="All posts" />
       <Bio />
-      <ol style={{ listStyle: `none` }}>
-        {posts.map(post => {
-          const title = post.frontmatter.title || post.fields.slug
 
+      <ol style={{ listStyle: `none` }}>
+        {/* Isso vem do client */}
+        <p>
+          {feed.length && (feed[0].title)}
+        </p>
+          
+
+        {/* Isso vem do server */}
+        <p>
+          {rssItems[0].title};
+        </p>
+        
+        {posts.map((post, index) => {
+          const title = post.frontmatter.title || post.fields.slug
+          
+          
           return (
             <li key={post.fields.slug}>
               <article
@@ -78,6 +92,17 @@ export default BlogIndex
 
 export const pageQuery = graphql`
   query {
+    podcastRss {
+      title
+      description
+      items {
+        title
+        description
+        link
+        author
+        published
+      }
+    }
     site {
       siteMetadata {
         title
